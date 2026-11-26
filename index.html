@@ -613,14 +613,16 @@ Metal Slug|Metal Slug|1996|#6b8e23|#e0b000|
 Contra|Contra|1987|#c8102e|#1e5aa8|
 `;
 
-/* the 30 most famous games ever, in this order: shown first-to-last under "أبرز الألعاب" */
+/* the 30 best-known games in the Arab world and the Middle East, in this order:
+   shown first-to-last under "أبرز الألعاب" (football, GTA, PUBG Mobile, internet-cafe PC classics,
+   PlayStation 1/2 favourites, anime fighters and the big Gulf mobile games) */
 const TOP_IDS = [
-  "minecraft", "grand-theft-auto-v", "tetris", "super-mario-bros", "pac-man",
-  "grand-theft-auto-san-andreas", "the-legend-of-zelda-ocarina-of-time", "pokemon-red-blue", "fortnite", "red-dead-redemption-2",
-  "the-witcher-3-wild-hunt", "the-last-of-us", "the-elder-scrolls-v-skyrim", "elden-ring", "counter-strike-1-6",
-  "world-of-warcraft", "league-of-legends", "call-of-duty-4-modern-warfare", "super-mario-64", "the-legend-of-zelda-breath-of-the-wild",
-  "pubg-battlegrounds", "god-of-war", "street-fighter-ii", "half-life-2", "resident-evil-4",
-  "dark-souls", "mario-kart-8-deluxe", "sonic-the-hedgehog", "among-us", "clash-of-clans"
+  "grand-theft-auto-san-andreas", "pubg-mobile", "pro-evolution-soccer-2013", "fifa-23", "grand-theft-auto-v",
+  "counter-strike-1-6", "command-conquer-generals", "stronghold-crusader", "call-of-duty-modern-warfare-2", "need-for-speed-most-wanted",
+  "tekken-3", "clash-of-clans", "fortnite", "grand-theft-auto-vice-city", "minecraft",
+  "pro-evolution-soccer-6", "age-of-empires-ii", "crash-bandicoot", "free-fire", "wwe-smackdown-here-comes-the-pain",
+  "dragon-ball-z-budokai-tenkaichi-3", "god-of-war", "red-dead-redemption-2", "prince-of-persia-the-sands-of-time", "8-ball-pool",
+  "subway-surfers", "metal-slug", "naruto-shippuden-ultimate-ninja-storm-4", "resident-evil-4", "brawl-stars"
 ];
 const TOP_RANK = Object.create(null);
 TOP_IDS.forEach((id, i) => { TOP_RANK[id] = i; });
