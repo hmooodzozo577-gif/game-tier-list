@@ -39,7 +39,7 @@
   --f-display:"Lalezar","IBM Plex Sans Arabic",Tahoma,sans-serif;
   --f-body:"IBM Plex Sans Arabic",system-ui,"Segoe UI",Tahoma,sans-serif;
   --f-tile:"Barlow Condensed","Arial Narrow","Roboto Condensed",sans-serif;
-  --tile:68px;
+  --tile:58px;
   --tile-h:calc(var(--tile) * 4 / 3);
   --cols:1;
   --rows:1;
@@ -110,10 +110,10 @@ body.is-dragging .tier-zone{background:rgba(255,255,255,.02)}
   --fs:.3;
   width:var(--tile);height:var(--tile-h);flex:0 0 auto;position:relative;
   display:grid;place-items:center;padding:4px 4px 4px 8px;
-  border:0;border-radius:9px;
+  border:0;border-radius:calc(var(--tile) * .13);
   background:linear-gradient(145deg,var(--c1),var(--c2));
   color:var(--fg);
-  font-family:var(--f-tile);font-weight:700;font-size:calc(var(--tile) * var(--fs));line-height:1.02;
+  font-family:var(--f-tile);font-weight:700;font-size:max(8px, calc(var(--tile) * var(--fs)));line-height:1.02;
   text-transform:uppercase;text-align:center;letter-spacing:.01em;
   cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.14),0 2px 6px rgba(0,0,0,.35);
@@ -128,8 +128,8 @@ body.is-dragging .tier-zone{background:rgba(255,255,255,.02)}
 /* cover art: one sprite sheet, each tile shows its own cell */
 .tile.has-cover{background-color:var(--c1);background-image:url("covers.jpg");background-size:calc(var(--cols) * 100%) calc(var(--rows) * 100%);background-position:var(--bx) var(--by);background-repeat:no-repeat;padding:0;place-items:end stretch}
 .tile.has-cover::before,.tile.has-cover::after{display:none}
-.tile.has-cover span{width:100%;max-width:none;padding:14px 3px 3px;font-size:calc(var(--tile) * .15);line-height:1.05;color:#fff;background:linear-gradient(180deg,transparent,rgba(0,0,0,.86) 62%);text-shadow:none;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;hyphens:none;-webkit-hyphens:none;overflow-wrap:normal;word-break:break-word}
-body.hide-names .tile.has-cover span{display:none}
+.tile.has-cover span{width:100%;max-width:none;padding:12px 2px 2px;font-size:max(8px, calc(var(--tile) * .15));line-height:1.05;color:#fff;background:linear-gradient(180deg,transparent,rgba(0,0,0,.86) 62%);text-shadow:none;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;hyphens:none;-webkit-hyphens:none;overflow-wrap:normal;word-break:break-word}
+body:not(.show-names) .tile.has-cover span{display:none}
 .tile:hover{filter:brightness(1.08)}
 .tile.is-selected{outline:3px solid var(--accent);outline-offset:2px;transform:translateY(-2px)}
 .is-ghost{opacity:.3}
@@ -171,9 +171,11 @@ body.hide-names .tile.has-cover span{display:none}
   .shelf-body{max-height:none;flex:1}
 }
 @media (max-width:560px){
-  :root{--tile:clamp(52px, calc((100vw - 134px) / 4), 64px);--label-w:72px;--gap:4px}
-  .tier-label{font-size:.98rem;padding-inline:4px}
-  .tier-zone{padding:5px}
+  /* six covers per row: screen minus gutters, border, label, zone padding and five gaps */
+  :root{--tile:clamp(40px, calc((100vw - 124px) / 6), 52px);--label-w:64px;--gap:3px}
+  .tier-label{font-size:.88rem;padding-inline:3px;line-height:1.1}
+  .tier-zone{padding:4px}
+  .tier-zone:empty::before{font-size:.75rem;padding-inline:4px}
   .btn{padding:8px 12px;font-size:.88rem}
   .shelf-body{max-height:min(38vh,330px)}
   .shelf-head{padding-block:8px 6px;gap:8px}
@@ -250,7 +252,7 @@ body.hide-names .tile.has-cover span{display:none}
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>
         </button>
         <span class="progress" id="progress"></span>
-        <button class="mini-btn" id="namesBtn" type="button">أخفِ الأسماء</button>
+        <button class="mini-btn" id="namesBtn" type="button">أظهر الأسماء</button>
       </div>
       <div class="shelf-body" id="shelfBody">
         <div class="search"><input id="search" type="search" placeholder="ابحث: GTA، فيفا، ماينكرافت…" aria-label="ابحث عن لعبة" autocomplete="off"></div>
@@ -808,7 +810,7 @@ let zones = Object.create(null);
 let sortables = [];
 
 function defaultState() {
-  return { tiers: DEFAULT_TIERS.map((t) => ({ ...t })), place: {}, custom: [], name: "", hideNames: false };
+  return { tiers: DEFAULT_TIERS.map((t) => ({ ...t })), place: {}, custom: [], name: "", showNames: false };
 }
 function load() {
   let s = null;
@@ -820,7 +822,7 @@ function load() {
   const untouched = out.tiers.length === OLD_DEFAULT_NAMES.length &&
     out.tiers.every((t, i) => t.id === "t" + (i + 1) && t.name === OLD_DEFAULT_NAMES[i]);
   if (untouched) out.tiers = DEFAULT_TIERS.map((t) => ({ ...t })); /* same ids, so placements carry over */
-  out.hideNames = s.hideNames === true;
+  out.showNames = s.showNames === true;
   out.custom = Array.isArray(s.custom) ? s.custom.filter((c) => c && typeof c.id === "string" && typeof c.n === "string").map((c) => ({ id: c.id, n: c.n.slice(0, 40), c1: c.c1, c2: c.c2 })) : [];
   out.name = typeof s.name === "string" ? s.name.slice(0, 24) : "";
   out.place = s.place && typeof s.place === "object" ? s.place : {};
@@ -1157,11 +1159,11 @@ $("playerName").addEventListener("input", (e) => {
 $("search").addEventListener("input", (e) => { query = e.target.value; applyFilter(); poolScroll.scrollTop = 0; });
 
 function applyNames() {
-  document.body.classList.toggle("hide-names", !!state.hideNames);
-  $("namesBtn").textContent = state.hideNames ? "أظهر الأسماء" : "أخفِ الأسماء";
+  document.body.classList.toggle("show-names", !!state.showNames);
+  $("namesBtn").textContent = state.showNames ? "أخفِ الأسماء" : "أظهر الأسماء";
 }
 $("namesBtn").addEventListener("click", () => {
-  state.hideNames = !state.hideNames;
+  state.showNames = !state.showNames;
   save();
   applyNames();
 });
@@ -1367,12 +1369,12 @@ function drawTile(ctx, g, x, y, T, TH) {
   ctx.clip();
   if (p) {
     ctx.drawImage(coverImg, p.col * COVERS.w, p.row * COVERS.h, COVERS.w, COVERS.h, x, y, T, TH);
-    if (!state.hideNames) {
+    if (state.showNames) {
       const label = g.s.toUpperCase().replace(/­/g, "");
-      let fs = 17;
+      let fs = 15;
       ctx.font = '700 ' + fs + 'px "Barlow Condensed", "Arial Narrow", sans-serif';
       let lines = wrapText(ctx, label, T - 10, true);
-      if (lines.length > 2) { fs = 15; ctx.font = '700 ' + fs + 'px "Barlow Condensed", "Arial Narrow", sans-serif'; lines = wrapText(ctx, label, T - 10, true); }
+      if (lines.length > 2) { fs = 13; ctx.font = '700 ' + fs + 'px "Barlow Condensed", "Arial Narrow", sans-serif'; lines = wrapText(ctx, label, T - 10, true); }
       if (lines.length > 2) lines = [lines[0], lines[1].replace(/-$/, "") + "…"];
       const band = lines.length * fs * 1.05 + 22;
       const sh = ctx.createLinearGradient(x, y + TH - band, x, y + TH);
@@ -1429,7 +1431,7 @@ async function drawShot() {
     ]);
   } catch (e) { /* fall back to system fonts */ }
   const tiers = state.tiers.filter((t) => (state.place[t.id] || []).length);
-  const W = 1080, P = 44, LW = 196, T = 104, TH = Math.round(T * 4 / 3), G = 10;
+  const W = 1080, P = 44, LW = 196, T = 86, TH = Math.round(T * 4 / 3), G = 10;
   const zoneW = W - P * 2 - LW;
   const per = Math.max(1, Math.floor((zoneW - G) / (T + G)));
   const HEAD = 176, FOOT = 78;
