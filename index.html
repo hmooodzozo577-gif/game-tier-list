@@ -613,8 +613,21 @@ Metal Slug|Metal Slug|1996|#6b8e23|#e0b000|
 Contra|Contra|1987|#c8102e|#1e5aa8|
 `;
 
+/* the 30 most famous games ever, in this order: shown first-to-last under "أبرز الألعاب" */
+const TOP_IDS = [
+  "minecraft", "grand-theft-auto-v", "tetris", "super-mario-bros", "pac-man",
+  "grand-theft-auto-san-andreas", "the-legend-of-zelda-ocarina-of-time", "pokemon-red-blue", "fortnite", "red-dead-redemption-2",
+  "the-witcher-3-wild-hunt", "the-last-of-us", "the-elder-scrolls-v-skyrim", "elden-ring", "counter-strike-1-6",
+  "world-of-warcraft", "league-of-legends", "call-of-duty-4-modern-warfare", "super-mario-64", "the-legend-of-zelda-breath-of-the-wild",
+  "pubg-battlegrounds", "god-of-war", "street-fighter-ii", "half-life-2", "resident-evil-4",
+  "dark-souls", "mario-kart-8-deluxe", "sonic-the-hedgehog", "among-us", "clash-of-clans"
+];
+const TOP_RANK = Object.create(null);
+TOP_IDS.forEach((id, i) => { TOP_RANK[id] = i; });
+
 const PACK_LABELS = [
   ["all", "الكل"],
+  ["top", "أبرز الألعاب"],
   ["new", "جديدة"],
   ["o", "عالم مفتوح"],
   ["s", "قصة وأكشن"],
@@ -731,6 +744,7 @@ RAW.trim().split("\n").forEach((line) => {
   const g = { id, s, n, y: Number(y), c1, c2, packs: new Set(p.split("").filter(Boolean)) };
   if (g.y < 2010) g.packs.add("classic");
   if (g.y >= 2024) g.packs.add("new");
+  if (TOP_RANK[id] !== undefined) g.packs.add("top");
   g.hay = norm(n + " " + s);
   GAMES.push(g);
   BY_ID[id] = g;
@@ -867,7 +881,12 @@ function cleanPlace() {
   });
   state.place = place;
 }
-const order = () => customIds.slice().reverse().concat(BUILTIN_IDS);
+function order() {
+  const base = customIds.slice().reverse().concat(BUILTIN_IDS);
+  if (activePack !== "top") return base;
+  const rank = (id) => (TOP_RANK[id] !== undefined ? TOP_RANK[id] : 999);
+  return base.sort((a, b) => rank(a) - rank(b));
+}
 function placedSet() {
   const s = new Set();
   state.tiers.forEach((t) => (state.place[t.id] || []).forEach((id) => s.add(id)));
@@ -1032,7 +1051,7 @@ function renderChips(unplaced) {
       c.addEventListener("click", () => {
         activePack = key;
         Array.from(box.children).forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.pack === key)));
-        applyFilter();
+        renderPool(); /* re-sorts the list: "أبرز الألعاب" shows its own order */
         poolScroll.scrollTop = 0;
       });
       box.append(c);
