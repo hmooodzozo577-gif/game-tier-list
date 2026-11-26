@@ -647,8 +647,8 @@ const PACK_LABELS = [
 
 const DEFAULT_TIERS = [
   { id: "t1", name: "عظمة لن تتكرر", color: "#f4c430" },
-  { id: "t2", name: "أسطورية", color: "#d93f45" },
   { id: "t11", name: "فاقت التوقعات", color: "#e0569b" },
+  { id: "t2", name: "أسطورية", color: "#d93f45" },
   { id: "t3", name: "ممتازة", color: "#f07c2b" },
   { id: "t4", name: "حلوة", color: "#3fb56b" },
   { id: "t5", name: "عادية", color: "#2f9e9e" },
@@ -660,8 +660,12 @@ const DEFAULT_TIERS = [
   { id: "t9", name: "ما لعبتها", color: "#5d5a6b" },
   { id: "t10", name: "ما أعرفها", color: "#3e3b4a" }
 ];
-/* the first version's defaults, so a saved list that still uses them can move to the new set */
-const OLD_DEFAULT_NAMES = ["عظمة لن تتكرر", "أسطورية", "ممتازة", "حلوة", "عادية", "مبالغ فيها", "مملة", "سيئة", "ما لعبتها", "ما أعرفها"];
+/* earlier versions' default tiers (id:name, in order); a saved list that still matches one
+   exactly was never customized, so it moves to the current defaults (same ids keep placements) */
+const PAST_DEFAULTS = [
+  "t1:عظمة لن تتكرر|t2:أسطورية|t3:ممتازة|t4:حلوة|t5:عادية|t6:مبالغ فيها|t7:مملة|t8:سيئة|t9:ما لعبتها|t10:ما أعرفها",
+  "t1:عظمة لن تتكرر|t2:أسطورية|t11:فاقت التوقعات|t3:ممتازة|t4:حلوة|t5:عادية|t6:مبالغ فيها|t12:خيّبت ظني|t7:مملة|t8:سيئة|t13:ندمت إني لعبتها|t9:ما لعبتها|t10:ما أعرفها"
+];
 const SUGGESTED_TIERS = [
   ["ذكريات الطفولة", "#1f8a70"], ["مظلومة", "#0e7490"], ["أدمنتها", "#be185d"], ["ودّي ألعبها", "#4d7c0f"],
   ["ما ختمتها", "#a16207"], ["أعدتها كذا مرة", "#b5651d"], ["تستاهل كل ريال", "#15803d"], ["خسارة فلوسها", "#7f1d1d"],
@@ -833,9 +837,8 @@ function load() {
   const out = defaultState();
   out.tiers = s.tiers.filter((t) => t && typeof t.id === "string").map((t) => ({ id: t.id, name: String(t.name || "—").slice(0, 24), color: /^#[0-9a-f]{6}$/i.test(t.color) ? t.color : "#5d5a6b" }));
   if (!out.tiers.length) out.tiers = DEFAULT_TIERS.map((t) => ({ ...t }));
-  const untouched = out.tiers.length === OLD_DEFAULT_NAMES.length &&
-    out.tiers.every((t, i) => t.id === "t" + (i + 1) && t.name === OLD_DEFAULT_NAMES[i]);
-  if (untouched) out.tiers = DEFAULT_TIERS.map((t) => ({ ...t })); /* same ids, so placements carry over */
+  const layout = out.tiers.map((t) => t.id + ":" + t.name).join("|");
+  if (PAST_DEFAULTS.includes(layout)) out.tiers = DEFAULT_TIERS.map((t) => ({ ...t })); /* same ids, so placements carry over */
   out.showNames = s.showNames === true;
   out.custom = Array.isArray(s.custom) ? s.custom.filter((c) => c && typeof c.id === "string" && typeof c.n === "string").map((c) => ({ id: c.id, n: c.n.slice(0, 40), c1: c.c1, c2: c.c2 })) : [];
   out.name = typeof s.name === "string" ? s.name.slice(0, 24) : "";
